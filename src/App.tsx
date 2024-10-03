@@ -151,6 +151,10 @@ function Screan(props:{from:number, to:number}): JSX.Element {
     gl.bindBuffer(gl.ARRAY_BUFFER, areaBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(areaVertices), gl.STATIC_DRAW);
   
+    // blending 활성화
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); // 반투명 효과를 위한 혼합 모드 설정
+
     // 그리기 설정
     const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
     gl.enableVertexAttribArray(positionAttributeLocation);
@@ -188,41 +192,48 @@ function Screan(props:{from:number, to:number}): JSX.Element {
     }
   `;
 
-  const fragmentShaderSource = `
+    const fragmentShaderSource = `
     void main(void) {
-      gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0); // 회색
+      gl_FragColor = vec4(0.3, 0.3, 0.3, 0.5); // 회색
     }
   `;
-
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-  if (!vertexShader || !fragmentShader) return;
-
-  const program = createProgram(gl, vertexShader, fragmentShader);
-  if (!program) return;
-
-  // 버퍼 생성 및 정점 데이터 설정
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  let positions:number[] = [];
-  
-  for (let x = -Math.PI; x <= Math.PI; x += 0.1) {
-    positions.push(x / Math.PI); // x 값을 [-1, 1] 범위로 정규화
-    positions.push(Math.sin(x)); // sin 함수 값 계산
+    const fragmentShaderSource1 = `
+    void main(void) {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); // 검은색
+    }
+  `;
+    const fragmentShaderSource2 = `
+  void main(void) {
+    gl_FragColor = vec4(0.3, 0.5, 0.7, 0.7); // 하늘색
   }
-  
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+`;
 
-  // 그리기 설정
-  gl.useProgram(program);
-  // 그리드 그리기
-  drawGrid(gl, program);
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    const fragmentShader1 = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource1);
+    const fragmentShader2 = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource2);
+    
+    if (!vertexShader || !fragmentShader) return;
+    if (!fragmentShader1 || !fragmentShader2) return;
 
-  // sin 곡선 그리기
-  drawSinCurve(gl, program);
+    const program = createProgram(gl, vertexShader, fragmentShader);
+    const program1 = createProgram(gl, vertexShader, fragmentShader1);
+    const program2 = createProgram(gl, vertexShader, fragmentShader2);
+    
+    if (!program || !program1 || !program2) return;
+    
+    // 그리기 설정
+    gl.useProgram(program);
+    // 그리드 그리기
+    drawGrid(gl, program);
+    
+    gl.useProgram(program2);
+    // 적분 영역 그리기 (a = -π/2, b = π/2)
+    drawIntegralArea(gl, program2, props.from, props.to);
 
-  // 적분 영역 그리기 (a = -π/2, b = π/2)
-  drawIntegralArea(gl, program, props.from, props.to);
+    gl.useProgram(program1);
+    // sin 곡선 그리기
+    drawSinCurve(gl, program1);
 
   }, [props.from, props.to]);
 
