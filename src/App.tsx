@@ -27,7 +27,7 @@ function App() {
           <p><TeX math="{b} = " /> <input className='inputNum' type="number" onChange={(e) => { set_b(parseFloat(e.target.value)); }}></input></p>
         </div>
         <div className='result'>
-          <p><TeX math="{L} = " /> {L} <span><button onClick={() => { let l_val = inte_sin(b, a); l_val.then((val) => { set_L(Math.round(val*10000)/10000) }) }}>calculate</button></span></p>
+          <p><TeX math="{L} = " /> {L} <span><button onClick={() => { let l_val = inte_sin(b, a); l_val.then((val) => { set_L(Math.round(val*1000000)/1000000) }) }}>calculate</button></span></p>
         </div>
       </div>
     </>
