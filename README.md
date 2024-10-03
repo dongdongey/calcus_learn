@@ -3,4 +3,4 @@
 러스트로 수치계산 해주는 함수를 리액트에서 tauri 커맨드로 호출
 
 ## 실행 결과
-![sample1](public/sample2.png)
+![sample](public/sample3.png)
